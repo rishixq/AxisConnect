@@ -49,34 +49,6 @@ Each button triggers a predefined prompt to the assistant.
 
 ---
 
-## 🏗️ Project Architecture
-
-AxisConnect/
-│
-├── app.py
-├── assistant.py
-├── gui.py
-├── prompts.py
-├── database.py
-│
-├── models/
-│   └── models.py
-│
-├── services/
-│   └── employee_service.py
-│
-├── data/
-│   ├── umbrella_corp_policies.pdf
-│   ├── vectorstore/
-│   └── employees.py
-│
-├── requirements.txt
-├── .gitignore
-└── README.md
-
-
----
-
 ## 🧠 Technology Stack
 
 ### **AI / NLP**
