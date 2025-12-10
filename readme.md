@@ -53,26 +53,27 @@ Each button triggers a predefined prompt to the assistant.
 
 AxisConnect/
 │
-├── app.py # Main Streamlit application (UI + Login + Sidebar)
-├── assistant.py # AI + RAG + response engine
-├── gui.py # UI theme + chat rendering
-├── prompts.py # System prompt + welcome message
-├── database.py # SQLAlchemy database connection
+├── app.py                     # Main Streamlit app (UI + login + sidebar + quick actions)
+├── assistant.py               # RAG pipeline + LLM + AI response logic
+├── gui.py                     # Chat UI rendering + custom theme
+├── prompts.py                 # System prompt + welcome prompt
+├── database.py                # SQLAlchemy DB engine/session
 │
 ├── models/
-│ ├── models.py # DB models (Employee table)
+│   └── models.py              # Employee SQLAlchemy model
 │
 ├── services/
-│ ├── employee_service.py # Functions to fetch employee data
+│   └── employee_service.py    # Employee profile fetch/merge functions
 │
 ├── data/
-│ ├── employees.py # Optional local data mock
-│ ├── umbrella_corp_policies.pdf
-│ ├── vectorstore/ # Chroma persistent DB
+│   ├── umbrella_corp_policies.pdf  # HR policy PDF (for RAG)
+│   ├── vectorstore/                # Chroma persistent vector DB
+│   └── employees.py                # Optional mock data
 │
-├── requirements.txt
-├── README.md
-└── .gitignore
+├── requirements.txt           # Python dependencies
+├── .gitignore                 # Ignored files
+└── README.md                  # Documentation
+
 
 ---
 
