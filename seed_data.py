@@ -32,7 +32,7 @@ def create_employee(i):
     return Employee(
         employee_code=f"EMP{i:03d}",
         name=f"Employee {i}",
-        email=f"employee{i}@manvian.com",
+        email=f"employee{i}@axisme.com",
         phone=f"98765{random.randint(10000, 99999)}",
         gender=random.choice(["Male", "Female"]),
         date_of_birth=date(1998 + random.randint(0, 5), random.randint(1, 12), random.randint(1, 28)),
