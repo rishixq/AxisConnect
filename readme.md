@@ -10,7 +10,7 @@ This project combines **LLM-powered chat**, **database-backed employee profiles*
 ## 🔥 Demo Video
 
 🎥 **Watch the full project demo:**
-👉 [https://youtu.be/t94JwCQ8cq0](https://youtu.be/t94JwCQ8cq0)
+👉 [https://youtu.be/3CkXnIZRWB4](https://youtu.be/3CkXnIZRWB4)
 
 ---
 
