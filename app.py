@@ -64,20 +64,11 @@ if __name__ == "__main__":
         """
         try:
             embedding_function = load_embedding()
-            persistent_path = "./data/vectorstore"
+            persistent_path = "/tmp/chroma"
+
 
             # If persistent path exists and looks like a saved chroma DB, try to load
-            if os.path.isdir(persistent_path):
-                # check if main DB file exists (common name used by Chroma)
-                sqlite_path = os.path.join(persistent_path, "chroma.sqlite3")
-                if os.path.exists(sqlite_path):
-                    try:
-                        vectorstore = Chroma(persist_directory=persistent_path, embedding=embedding_function)
-                        logging.info("Loaded vectorstore from persistent directory.")
-                        return vectorstore
-                    except Exception as e:
-                        logging.warning(f"Failed to open persisted vectorstore, will attempt recreate: {e}")
-
+            
             # If pdf doesn't exist, return None (error handled by caller)
             if not os.path.isfile(pdf_path):
                 logging.error(f"Vector Store Error: PDF not found at {pdf_path}")
