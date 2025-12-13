@@ -1,11 +1,4 @@
-# Streamlit (pin to avoid resolver issues)
 streamlit==1.38.0
-
-# ---- UI dependency pins (CRITICAL FIX) ----
-rich==14.2.0
-markdown-it-py==4.0.0
-mdurl==0.1.2
-pygments==2.19.2
 
 # ---- LangChain + Extensions ----
 langchain==0.3.1
