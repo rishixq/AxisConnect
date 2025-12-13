@@ -32,11 +32,58 @@ if __name__ == "__main__":
     st.set_page_config(page_title="AxisConnect", page_icon="🤖", layout="wide")
 
     # ---------------------------------------------------------
-    # VECTOR STORE
+    # CACHING HELPERS (performance improvements)
     # ---------------------------------------------------------
+    @st.cache_resource(show_spinner="Loading LLM…")
+    def load_llm():
+        """Cache LLM instance so it's created once per app instance."""
+        try:
+            return ChatGroq(model="llama-3.1-8b-instant")
+        except Exception as e:
+            logging.error(f"LLM init error: {e}")
+            raise
+
+    @st.cache_resource(show_spinner="Loading Embeddings…")
+    def load_embedding():
+        """Cache HuggingFace embeddings object."""
+        try:
+            return HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2"
+            )
+        except Exception as e:
+            logging.error(f"Embedding init error: {e}")
+            raise
+
     @st.cache_resource(ttl=3600, show_spinner="Loading Company Policies…")
     def init_vector_store(pdf_path):
+        """
+        Initialize or load a persistent Chroma vectorstore.
+        - If ./data/vectorstore exists and looks populated, attempt to open it (fast).
+        - Otherwise, create vectorstore from PDF, persist it, and return.
+        Returns None on failure (the app will show existing error handling).
+        """
         try:
+            embedding_function = load_embedding()
+            persistent_path = "./data/vectorstore"
+
+            # If persistent path exists and looks like a saved chroma DB, try to load
+            if os.path.isdir(persistent_path):
+                # check if main DB file exists (common name used by Chroma)
+                sqlite_path = os.path.join(persistent_path, "chroma.sqlite3")
+                if os.path.exists(sqlite_path):
+                    try:
+                        vectorstore = Chroma(persist_directory=persistent_path, embedding=embedding_function)
+                        logging.info("Loaded vectorstore from persistent directory.")
+                        return vectorstore
+                    except Exception as e:
+                        logging.warning(f"Failed to open persisted vectorstore, will attempt recreate: {e}")
+
+            # If pdf doesn't exist, return None (error handled by caller)
+            if not os.path.isfile(pdf_path):
+                logging.error(f"Vector Store Error: PDF not found at {pdf_path}")
+                return None
+
+            # Load PDF → split → embeddings → persist
             loader = PyPDFLoader(pdf_path)
             docs = loader.load()
 
@@ -46,25 +93,27 @@ if __name__ == "__main__":
             )
             splits = text_splitter.split_documents(docs)
 
-            embedding_function = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2"
-            )
-
-            persistent_path = "./data/vectorstore"
-
+            # Create vectorstore
             vectorstore = Chroma.from_documents(
                 documents=splits,
                 embedding=embedding_function,
                 persist_directory=persistent_path,
             )
 
+            logging.info("Created vectorstore and persisted to disk.")
             return vectorstore
 
         except Exception as e:
             logging.error(f"Vector Store Error: {str(e)}")
-            st.error(f"Failed to load policy database: {str(e)}")
             return None
 
+    # ---------------------------------------------------------
+    # CREATE/LOAD LLM + VECTOR STORE
+    # ---------------------------------------------------------
+    # LLM is now cached and reused across requests (faster).
+    llm = load_llm()
+
+    # Vector store is cached (or None if something failed)
     vector_store = init_vector_store("data/umbrella_corp_policies.pdf")
 
     # ---------------------------------------------------------
@@ -200,8 +249,6 @@ if __name__ == "__main__":
     # ---------------------------------------------------------
     # LLM + ASSISTANT
     # ---------------------------------------------------------
-    llm = ChatGroq(model="llama-3.1-8b-instant")
-
     assistant = Assistant(
         system_prompt=SYSTEM_PROMPT,
         llm=llm,
@@ -231,11 +278,10 @@ if __name__ == "__main__":
     # ---------------------------------------------------------
     # RENDER CHAT
     # ---------------------------------------------------------
-    # ---------------------------------------------------------
-# RENDER CHAT
-# ---------------------------------------------------------
 
+# ---------------------------------------------------------
 # ⭐ WELCOME BANNER (shows only once after login)
+# ---------------------------------------------------------
 if "show_welcome" in st.session_state and st.session_state.show_welcome:
     employee_name = st.session_state.employee_profile.get("name", "Employee")
 
@@ -260,7 +306,3 @@ if "show_welcome" in st.session_state and st.session_state.show_welcome:
 
 # Now render chat normally
 gui.render()
-
-    
-
-
